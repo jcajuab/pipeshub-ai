@@ -21,6 +21,11 @@ const Jwt = {
   OAuthCallback: lazy(() => import('src/auth/view/auth/oauth-callback')),
 };
 
+const leftPanelMedia = {
+  videoUrl: '/left-panel.mp4',
+  imgUrl: '/logo/welcomegif.gif',
+};
+
 
 const authJwt = {
   children: [
@@ -28,7 +33,12 @@ const authJwt = {
       path: 'sign-in',
       element: (
         <GuestGuard>
-          <AuthSplitLayout section={{ title: 'Hi, Welcome' }}>
+          <AuthSplitLayout
+            section={{
+              title: 'Hi, Welcome',
+              ...leftPanelMedia,
+            }}
+          >
             <Jwt.SignInPage />
           </AuthSplitLayout>
         </GuestGuard>
@@ -38,8 +48,13 @@ const authJwt = {
       path: 'sign-in/samlSso/success',  
       element: (
         <GuestGuard>
-          <AuthSplitLayout section={{ title: 'Processing authentication...' }}>
-          <Jwt.SamlSsoSuccess />
+          <AuthSplitLayout
+            section={{
+              title: 'Processing authentication...',
+              ...leftPanelMedia,
+            }}
+          >
+            <Jwt.SamlSsoSuccess />
           </AuthSplitLayout>
         </GuestGuard>
       ),
@@ -56,7 +71,12 @@ const authJwt = {
       path: 'sign-up',
       element: (
         <GuestGuard>
-          <AuthSplitLayout>
+          <AuthSplitLayout
+            section={{
+              title: 'Create your account',
+              ...leftPanelMedia,
+            }}
+          >
             <Jwt.SignUpPage />
           </AuthSplitLayout>
         </GuestGuard>
@@ -66,7 +86,12 @@ const authJwt = {
       path: 'reset-password',
       element: (
         <GuestGuard>
-          <AuthSplitLayout>
+          <AuthSplitLayout
+            section={{
+              title: 'Reset your password',
+              ...leftPanelMedia,
+            }}
+          >
             <Jwt.ResetPasswordPage />
           </AuthSplitLayout>
         </GuestGuard>
