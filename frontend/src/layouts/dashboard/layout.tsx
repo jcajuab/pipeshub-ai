@@ -3,18 +3,17 @@ import type { Theme, SxProps, Breakpoint } from '@mui/material/styles';
 
 import { useNavigate } from 'react-router';
 import { useState, useEffect } from 'react';
-import githubIcon from '@iconify-icons/mdi/github';
 
 import Box from '@mui/material/Box';
 import Alert from '@mui/material/Alert';
 import { useTheme } from '@mui/material/styles';
-import IconButton, { iconButtonClasses } from '@mui/material/IconButton';
+import { iconButtonClasses } from '@mui/material/IconButton';
 
 import { useBoolean } from 'src/hooks/use-boolean';
 
 import { useAdmin } from 'src/context/AdminContext';
 
-import { Iconify } from 'src/components/iconify';
+import { Logo } from 'src/components/logo';
 import { useSettingsContext } from 'src/components/settings';
 
 import { getOrgLogo, getOrgIdFromToken } from 'src/sections/accountdetails/utils';
@@ -33,7 +32,7 @@ import { HeaderSection } from '../core/header-section';
 import { StyledDivider, useNavColorVars } from './styles';
 import { AccountDrawer } from '../components/account-drawer';
 import { getDashboardNavData } from '../config-nav-dashboard';
-import {ThemeToggleButton } from '../components/theme-toggle-button';
+import { ThemeToggleButton } from '../components/theme-toggle-button';
    
 // ----------------------------------------------------------------------
 
@@ -59,6 +58,9 @@ export function DashboardLayout({ sx, children, header, data }: DashboardLayoutP
   const dynamicNavData = getDashboardNavData(user?.accountType, isAdmin);
 
   const navData = data?.nav ?? dynamicNavData;
+  const hasHorizontalNavItems = navData.some(
+    (section) => Array.isArray(section.items) && section.items.length > 0
+  );
   const navigate = useNavigate();
 
   // Get dynamic account menu items
@@ -108,8 +110,8 @@ export function DashboardLayout({ sx, children, header, data }: DashboardLayoutP
                   [theme.breakpoints.up(layoutQuery)]: {
                     height: 'var(--layout-nav-horizontal-height)',
                   },
-                   borderBottom: `1px solid ${theme.palette.divider}`,
-                boxShadow: theme.shadows[1],
+                  borderBottom: `1px solid ${theme.palette.divider}`,
+                  boxShadow: theme.shadows[1],
                 }),
               },
             },
@@ -177,19 +179,16 @@ export function DashboardLayout({ sx, children, header, data }: DashboardLayoutP
                     />
                   </Box>
                 ) : (
-                  <Box
-                    component="img"
-                    onClick={() => navigate('/')}
-                    src="/logo/logo-blue.svg"
-                    alt="Logo"
+                  <Logo
+                    variant="symbol"
+                    iconSize={28}
                     sx={{
                       display: 'none',
                       [theme.breakpoints.up(layoutQuery)]: {
                         display: 'inline-flex',
                       },
-                      width: 60,
-                      height: 30,
                       cursor: 'pointer',
+                      color: 'text.primary',
                     }}
                   />
                 )}
@@ -199,7 +198,7 @@ export function DashboardLayout({ sx, children, header, data }: DashboardLayoutP
                     sx={{ [theme.breakpoints.up(layoutQuery)]: { display: 'flex' } }}
                   />
                 )}
-                {isNavHorizontal && (
+                {isNavHorizontal && hasHorizontalNavItems && (
                   <NavHorizontal
                     data={navData}
                     layoutQuery={layoutQuery}
@@ -210,22 +209,6 @@ export function DashboardLayout({ sx, children, header, data }: DashboardLayoutP
             ),
             rightArea: (
               <Box display="flex" alignItems="center" gap={{ xs: 0, sm: 0.75 }}>
-                <IconButton
-                  component="a"
-                  href="https://github.com/pipeshub-ai/pipeshub-ai"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="GitHub Repository"
-                  size="large"
-                >
-                  <Iconify
-                    icon={githubIcon}
-                    color={theme.palette.mode === 'dark' ? 'white' : 'black'}
-                    width={30}
-                    height={30}
-                  />
-                </IconButton>
-                {/* task center remaining  */}
                 <ThemeToggleButton />
                 {/* Pass the dynamic account menu items instead of static _account */}
                 <AccountDrawer data={accountMenuItems} />

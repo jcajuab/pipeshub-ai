@@ -1,5 +1,8 @@
+import type { ReactNode } from 'react';
 import type { BoxProps } from '@mui/material/Box';
 import type { Breakpoint } from '@mui/material/styles';
+
+import { Fragment } from 'react';
 
 import Box from '@mui/material/Box';
 import Link from '@mui/material/Link';
@@ -8,6 +11,7 @@ import Typography from '@mui/material/Typography';
 import { alpha, useTheme } from '@mui/material/styles';
 
 import { RouterLink } from 'src/routes/components';
+import { varAlpha } from 'src/theme/styles/utils';
 
 import { AuthSplitLogo } from './logo';
 
@@ -91,7 +95,8 @@ export function Section({
         sx={{
           position: 'absolute',
           inset: 0,
-          bgcolor: alpha(theme.palette.common.black, 0.48),
+          borderRadius: 'inherit',
+          bgcolor: varAlpha(theme.vars.palette.common.blackChannel, 0.2),
         }}
       />
 
@@ -141,7 +146,12 @@ export function Section({
               lineHeight: 1.15,
             }}
           >
-            {title}
+            {title.split('|').map((line, index, array) => (
+              <Fragment key={index}>
+                {line}
+                {index < array.length - 1 && <br />}
+              </Fragment>
+            ))}
           </Typography>
         </Box>
 
