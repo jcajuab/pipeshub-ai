@@ -14,10 +14,11 @@ services:
     environment:
       - NODE_ENV=${NODE_ENV:-production}
       - LOG_LEVEL=${LOG_LEVEL:-info}
-      - ALLOWED_ORIGINS=${ALLOWED_ORIGINS:-}
+      - ALLOWED_ORIGINS=${ALLOWED_ORIGINS:-https://pipeshub.zaigo.ai,https://coolify.zaigo.ai}
       - SECRET_KEY=${SECRET_KEY:-your_random_encryption_secret_key}
-      - CONNECTOR_PUBLIC_BACKEND=${CONNECTOR_PUBLIC_BACKEND:-}
-      - FRONTEND_PUBLIC_URL=${FRONTEND_PUBLIC_URL:-}
+      - CONNECTOR_PUBLIC_BACKEND=${CONNECTOR_PUBLIC_BACKEND:-https://pipeshub.zaigo.ai}
+      - FRONTEND_PUBLIC_URL=${FRONTEND_PUBLIC_URL:-https://pipeshub.zaigo.ai}
+      - CSP_CONNECT_SRCS=${CSP_CONNECT_SRCS:-https://pipeshub.zaigo.ai,https://coolify.zaigo.ai}
       - QUERY_BACKEND=http://localhost:8000
       - CONNECTOR_BACKEND=http://localhost:8088
       - INDEXING_BACKEND=http://localhost:8091
