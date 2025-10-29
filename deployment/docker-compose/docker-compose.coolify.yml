@@ -1,6 +1,6 @@
 services:
   pipeshub-ai:
-    image: pipeshubai/pipeshub-ai:${IMAGE_TAG:-latest}
+    image: aristonton/pipeshub-ai:${IMAGE_TAG:-latest}
     depends_on:
       - arango
       - etcd

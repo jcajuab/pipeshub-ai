@@ -23,7 +23,14 @@ type Props = ButtonProps & {
   onClose?: () => void;
 };
 
-export function SignOutButton({ onClose, sx, ...other }: Props) {
+export function SignOutButton({
+  onClose,
+  sx,
+  fullWidth = false,
+  variant = 'contained',
+  color = 'error',
+  ...other
+}: Props) {
   const router = useRouter();
   const { checkUserSession } = useAuthContext();
   const [isProcessing, setIsProcessing] = useState(false);
@@ -45,17 +52,21 @@ export function SignOutButton({ onClose, sx, ...other }: Props) {
 
   return (
     <Button
-      fullWidth
-      variant="contained"
-      color="error"
+      fullWidth={fullWidth}
+      variant={variant}
+      color={color}
       onClick={handleLogout}
       startIcon={<Icon icon={logoutIcon} width={20} height={20} />}
       disabled={isProcessing}
       sx={{
-        height: 48,
-        borderRadius: 1.5,
+        height: 40,
+        borderRadius: 1,
         fontWeight: 600,
         textTransform: 'none',
+        boxShadow: 'none',
+        '&:hover': {
+          boxShadow: 'none',
+        },
         ...sx,
       }}
       {...other}

@@ -1,17 +1,16 @@
 import type { IconButtonProps } from '@mui/material/IconButton';
 
 import { useState, useEffect, useCallback } from 'react';
-import closeIcon from '@iconify-icons/mingcute/close-line';
+import type { MouseEvent } from 'react';
 import settingsIcon from '@iconify-icons/solar/settings-bold-duotone';
 
 import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
-import Drawer from '@mui/material/Drawer';
 import SvgIcon from '@mui/material/SvgIcon';
 import Divider from '@mui/material/Divider';
 import MenuItem from '@mui/material/MenuItem';
 import Typography from '@mui/material/Typography';
-import IconButton from '@mui/material/IconButton';
+import Popover from '@mui/material/Popover';
 import { alpha, styled, useTheme } from '@mui/material/styles';
 
 import { paths } from 'src/routes/paths';
@@ -19,7 +18,6 @@ import { useRouter, usePathname } from 'src/routes/hooks';
 
 import { Label } from 'src/components/label';
 import { Iconify } from 'src/components/iconify';
-import { Scrollbar } from 'src/components/scrollbar';
 import { AnimateAvatar } from 'src/components/animate';
 
 import { getOrgLogo, getOrgIdFromToken } from 'src/sections/accountdetails/utils';
@@ -29,27 +27,6 @@ import { useAuthContext } from 'src/auth/hooks';
 import { AccountButton } from './account-button';
 import { SignOutButton } from './sign-out-button';
 // ----------------------------------------------------------------------
-
-// Styled components to reduce inline styling and improve readability
-const CloseButton = styled(IconButton)(({ theme }) => {
-  const isDark = theme.palette.mode === 'dark';
-  return {
-    top: 16,
-    left: 16,
-    zIndex: 9,
-    position: 'absolute',
-    color: theme.palette.text.secondary,
-    backgroundColor: alpha(theme.palette.background.paper, isDark ? 0.3 : 0.8),
-    boxShadow: isDark
-      ? `0 2px 6px ${alpha(theme.palette.common.black, 0.2)}`
-      : `0 2px 8px ${alpha(theme.palette.common.black, 0.05)}`,
-    backdropFilter: 'blur(8px)',
-    '&:hover': {
-      backgroundColor: alpha(theme.palette.background.paper, isDark ? 0.5 : 1),
-    },
-    transition: 'all 0.2s ease-in-out',
-  };
-});
 
 const AccountLabel = styled(Label)(({ theme }) => {
   const isDark = theme.palette.mode === 'dark';
@@ -62,7 +39,6 @@ const AccountLabel = styled(Label)(({ theme }) => {
     fontWeight: 500,
     borderRadius: '4px',
     letterSpacing: '0.02em',
-    textTransform: 'uppercase',
     backgroundColor: isDark
       ? alpha(theme.palette.primary.main, 0.16)
       : alpha(theme.palette.primary.main, 0.08),
@@ -167,7 +143,7 @@ export function AccountDrawer({ data = [], sx, ...other }: AccountDrawerProps) {
   const { user } = useAuthContext();
   const isDark = theme.palette.mode === 'dark';
 
-  const [open, setOpen] = useState(false);
+  const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
   const [menuItems, setMenuItems] = useState(data);
   const [customLogo, setCustomLogo] = useState<string | null>('');
   const isBusiness =
@@ -208,31 +184,31 @@ export function AccountDrawer({ data = [], sx, ...other }: AccountDrawerProps) {
     setMenuItems(items);
   }, [data, isBusiness]);
 
-  const handleOpenDrawer = useCallback(() => {
-    setOpen(true);
+  const handleOpenPopover = useCallback((event: MouseEvent<HTMLElement>) => {
+    setAnchorEl(event.currentTarget);
   }, []);
 
-  const handleCloseDrawer = useCallback(() => {
-    setOpen(false);
+  const handleClosePopover = useCallback(() => {
+    setAnchorEl(null);
   }, []);
 
   const handleClickItem = useCallback(
     (path: string) => {
-      handleCloseDrawer();
+      handleClosePopover();
       router.push(path);
     },
-    [handleCloseDrawer, router]
+    [handleClosePopover, router]
   );
 
   const renderAvatar = (
     <AnimateAvatar
-      width={86}
+      width={56}
       slotProps={{
         avatar: { src: user?.photoURL, alt: user?.displayName },
         overlay: {
-          border: isDark ? 1 : 2,
-          spacing: 2.5,
-          color: `linear-gradient(135deg, ${alpha(theme.palette.primary.main, 0.1)} 25%, ${alpha(theme.palette.primary.main, 0.8)} 100%)`,
+          border: isDark ? 0 : 1,
+          spacing: 1.5,
+          color: `linear-gradient(135deg, ${alpha(theme.palette.primary.main, 0.08)} 15%, ${alpha(theme.palette.primary.main, 0.7)} 100%)`,
         },
       }}
     >
@@ -243,153 +219,130 @@ export function AccountDrawer({ data = [], sx, ...other }: AccountDrawerProps) {
   // Use a theme-derived background color for dark mode
   const darkModeGradient = `linear-gradient(180deg, ${alpha(theme.palette.grey[900], 0.8)} 0%, ${alpha(theme.palette.grey[900], 0.95)} 100%)`;
 
+  const open = Boolean(anchorEl);
+
   return (
     <>
       <AccountButton
-        onClick={handleOpenDrawer}
+        onClick={handleOpenPopover}
         photoURL={customLogo || user?.photoURL}
         displayName={user?.fullName}
         sx={sx}
         {...other}
       />
 
-      <Drawer
+      <Popover
         open={open}
-        onClose={handleCloseDrawer}
-        anchor="right"
-        slotProps={{ 
-          backdrop: { 
-            invisible: false,
-            sx: { 
-              backdropFilter: 'blur(0.5px)',
-              backgroundColor: isDark 
-                ? alpha(theme.palette.common.black, 0.1) 
-                : alpha(theme.palette.common.white, 0.1)
-            }
-          } 
-        }}
-        PaperProps={{ 
-          sx: { 
-            width: 300,
-            borderRadius: isDark ? '12px 0 0 12px' : '16px 0 0 16px',
-            boxShadow: isDark 
-              ? `0 0 24px ${alpha(theme.palette.common.black, 0.3)}`
-              : `0 0 24px ${alpha(theme.palette.common.black, 0.1)}`,
-            backgroundColor: isDark 
-              ? alpha(theme.palette.background.default, 0.95) 
-              : theme.palette.background.default,
-            backgroundImage: isDark ? darkModeGradient : 'none',
-          } 
+        anchorEl={anchorEl}
+        onClose={handleClosePopover}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+        transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+        slotProps={{
+          paper: {
+            sx: {
+              width: 320,
+              borderRadius: 2,
+              boxShadow: 'none',
+              backgroundColor: isDark
+                ? alpha(theme.palette.background.default, 0.98)
+                : theme.palette.background.paper,
+              backgroundImage: isDark ? darkModeGradient : 'none',
+              border: `1px solid ${alpha(theme.palette.divider, isDark ? 0.6 : 0.4)}`,
+              overflow: 'visible',
+              p: 0,
+            },
+          },
         }}
       >
-        <CloseButton onClick={handleCloseDrawer}>
-          <Iconify icon={closeIcon} />
-        </CloseButton>
-
-        <Scrollbar>
-          <Stack alignItems="center" sx={{ pt: 9, pb: 2 }}>
+        <Box sx={{ px: 2.25, pt: 2.25, pb: 2 }}>
+          <Stack direction="row" spacing={1.5} alignItems="center">
             {renderAvatar}
 
-            <Typography 
-              variant="subtitle1" 
-              noWrap 
-              sx={{ 
-                mt: 2.5, 
-                fontWeight: 600,
-                letterSpacing: '0.01em',
-              }}
-            >
-              {user?.fullName || user?.displayName}
-            </Typography>
+            <Box sx={{ minWidth: 0 }}>
+              <Typography variant="subtitle1" noWrap sx={{ fontWeight: 600, letterSpacing: '0.01em' }}>
+                {user?.fullName || user?.displayName}
+              </Typography>
 
-            <Typography 
-              variant="body2" 
-              sx={{ 
-                color: 'text.secondary', 
-                mt: 0.5,
-                fontSize: '0.8125rem',
-                opacity: 0.85,
-              }} 
-              noWrap
-            >
-              {user?.email}
-            </Typography>
-
-            {/* Show account type if available */}
-            {user?.accountType && (
-              <AccountLabel
-                color={
-                  user.accountType === 'business' || user.accountType === 'organization'
-                    ? 'primary'
-                    : 'info'
-                }
+              <Typography
+                variant="body2"
+                sx={{ color: 'text.secondary', mt: 0.25, fontSize: '0.8125rem', opacity: 0.85 }}
+                noWrap
               >
-                {user.accountType === 'business' || user.accountType === 'organization'
-                  ? 'Business Account'
-                  : 'Individual Account'}
-              </AccountLabel>
-            )}
+                {user?.email}
+              </Typography>
+
+              {user?.accountType && (
+                <AccountLabel
+                  sx={{ mt: 1 }}
+                  color={
+                    user.accountType === 'business' || user.accountType === 'organization'
+                      ? 'primary'
+                      : 'info'
+                  }
+                >
+                  {user.accountType === 'business' || user.accountType === 'organization'
+                    ? 'Business Account'
+                    : 'Individual Account'}
+                </AccountLabel>
+              )}
+            </Box>
           </Stack>
+        </Box>
 
-          <Box sx={{ px: 2, mt: 1 }}>
-            <Divider 
-              sx={{ 
-                my: 2,
-                opacity: isDark ? 0.2 : 0.4,
-                borderStyle: 'dashed',
-              }}
-            />
-            
-            <Stack spacing={0.25}>
-              {menuItems.map((option) => {
-                const rootLabel = pathname.includes('/dashboard') ? 'Home' : 'Dashboard';
-                const rootHref = pathname.includes('/dashboard') ? '/' : paths.dashboard.root;
-                const isActive = pathname === (option.label === 'Home' ? rootHref : option.href);
+        <Divider sx={{ mx: 2.25, my: 1.5, opacity: isDark ? 0.2 : 0.4, borderStyle: 'dashed' }} />
 
-                return (
-                  <MenuItemStyled
-                    key={option.label}
-                    onClick={() => handleClickItem(option.label === 'Home' ? rootHref : option.href)}
-                    isActive={isActive}
-                    isDark={isDark}
+        <Box sx={{ px: 2.25, pb: 1.5 }}>
+          <Stack spacing={0.5}>
+            {menuItems.map((option) => {
+              const rootLabel = pathname.includes('/dashboard') ? 'Home' : 'Dashboard';
+              const rootHref = pathname.includes('/dashboard') ? '/' : paths.dashboard.root;
+              const isActive = pathname === (option.label === 'Home' ? rootHref : option.href);
+
+              return (
+                <MenuItemStyled
+                  key={option.label}
+                  onClick={() => handleClickItem(option.label === 'Home' ? rootHref : option.href)}
+                  isActive={isActive}
+                  isDark={isDark}
+                >
+                  <IconContainer isActive={isActive} isDark={isDark}>
+                    {option.icon}
+                  </IconContainer>
+
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      fontWeight: isActive ? 600 : 400,
+                      flex: 1,
+                    }}
                   >
-                    <IconContainer isActive={isActive} isDark={isDark}>
-                      {option.icon}
-                    </IconContainer>
+                    {option.label === 'Home' ? rootLabel : option.label}
+                  </Typography>
 
-                    <Typography
-                      variant="body2"
+                  {option.info && (
+                    <Label
+                      color="error"
                       sx={{
-                        fontWeight: isActive ? 600 : 400,
-                        flex: 1,
+                        ml: 1,
+                        fontSize: '0.65rem',
+                        height: 18,
                       }}
                     >
-                      {option.label === 'Home' ? rootLabel : option.label}
-                    </Typography>
-
-                    {option.info && (
-                      <Label 
-                        color="error" 
-                        sx={{ 
-                          ml: 1,
-                          fontSize: '0.65rem',
-                          height: 18,
-                        }}
-                      >
-                        {option.info}
-                      </Label>
-                    )}
-                  </MenuItemStyled>
-                );
-              })}
-            </Stack>
-          </Box>
-        </Scrollbar>
-
-        <Box sx={{ p: 2.5, mt: 1 }}>
-          <SignOutButton onClose={handleCloseDrawer} />
+                      {option.info}
+                    </Label>
+                  )}
+                </MenuItemStyled>
+              );
+            })}
+          </Stack>
         </Box>
-      </Drawer>
+
+        <Divider sx={{ mx: 2.25, my: 1.5, opacity: isDark ? 0.2 : 0.4, borderStyle: 'dashed' }} />
+
+        <Box sx={{ px: 2.25, pb: 2.25 }}>
+          <SignOutButton fullWidth onClose={handleClosePopover} />
+        </Box>
+      </Popover>
     </>
   );
 }
